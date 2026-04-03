@@ -1001,6 +1001,31 @@ async function retryGenerate(){
 }
 
 // ═══════════════════════════════════════════════
+//  IMAGE COMPRESSION
+// ═══════════════════════════════════════════════
+function compressImage(b64, mimeType){
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = function(){
+      const canvas = document.createElement('canvas');
+      const MAX = 1024;
+      let w = img.width, h = img.height;
+      if(w > MAX || h > MAX){
+        if(w > h){ h = Math.round(h * MAX/w); w = MAX; }
+        else { w = Math.round(w * MAX/h); h = MAX; }
+      }
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      const compressed = canvas.toDataURL('image/jpeg', 0.7);
+      resolve(compressed.split(',')[1]);
+    };
+    img.onerror = reject;
+    img.src = 'data:' + (mimeType||'image/jpeg') + ';base64,' + b64;
+  });
+}
+
+// ═══════════════════════════════════════════════
 //  AI PROGRAM GENERATION
 // ═══════════════════════════════════════════════
 async function generateProgram(imgB64, imgType, isUpdate){
@@ -1079,10 +1104,20 @@ Rules:
     }
   ];
 
+  // Compress image before sending to stay under Netlify's 6MB body limit
+  let finalImgB64 = imgB64;
+  let finalImgType = imgType || 'image/jpeg';
   if(imgB64){
+    try {
+      finalImgB64 = await compressImage(imgB64, imgType);
+      finalImgType = 'image/jpeg';
+    } catch(e){ console.warn('Image compression failed, using original'); }
+  }
+
+  if(finalImgB64){
     userContent.push({
       type: 'image',
-      source: { type: 'base64', media_type: imgType || 'image/jpeg', data: imgB64 }
+      source: { type: 'base64', media_type: finalImgType, data: finalImgB64 }
     });
   }
 
