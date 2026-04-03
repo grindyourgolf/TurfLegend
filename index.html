@@ -1033,74 +1033,23 @@ async function generateProgram(imgB64, imgType, isUpdate){
 
   setLoadStatus('Reading your soil test…', 'Extracting pH, nutrients, and deficiencies', 1);
 
-  const systemPrompt = `You are LawnLGND, an expert turfgrass agronomist AI. You create precise, actionable, product-specific lawn care programs. You always recommend real brand name products available in the US (e.g. Milorganite, Flagship, Scotts, Andersons, Tenacity, Prodiamine, Headway G, etc.). You respond ONLY with valid JSON and nothing else — no markdown, no explanation, no preamble.`;
+  const systemPrompt = `You are a turfgrass expert. Respond ONLY with valid JSON, no markdown, no explanation.`;
 
   const imgContext = imgB64
-    ? `The user has uploaded a soil test screenshot. Analyze it carefully to extract all available values including pH, Nitrogen, Phosphorus, Potassium, Calcium, Magnesium, Sulfur, Iron, Manganese, Zinc, Copper, Boron, and Organic Matter. If a value is not readable, omit it.`
-    : `No soil test was provided. Build a program based on typical soil needs for this grass type and region.`;
+    ? `Analyze this soil test image and extract pH, N, P, K, and any other visible values.`
+    : `No soil test provided. Use typical values for this grass type and region.`;
 
   const userContent = [
     {
       type: 'text',
-      text: `SYSTEM CONTEXT: ${systemPrompt}
+      text: `${imgContext}
 
----
+Grass: ${p.grassType}, ZIP: ${p.zipCode}, Size: ${p.sqft}sqft, Current HOC: ${p.curHeight}, Target HOC: ${p.targetHeight}, Irrigation: ${p.irrigation}
 
-${imgContext}
+Return ONLY this JSON (no markdown):
+{"soilSummary":{"pH":null,"nitrogen":null,"phosphorus":null,"potassium":null,"iron":null,"notes":"2 sentence summary"},"insights":[{"type":"good","icon":"✅","text":"insight"}],"months":[{"month":"January","tasks":[{"id":"jan-1","category":"fert","name":"task name","desc":"what and why","rate":"rate/1000sqft","timing":"when","waterIn":"watering note","product":"Brand Name Product","productNote":"why this product"}]}]}
 
-Lawn Profile:
-- Grass Type: ${p.grassType}
-- Lawn Size: ${p.sqft} sq ft
-- ZIP Code: ${p.zipCode}
-- Current Mow Height: ${p.curHeight}
-- Target Mow Height: ${p.targetHeight}
-- Irrigation: ${p.irrigation}
-
-Build a complete January–December lawn program. Return ONLY this JSON structure — no markdown fences, no explanation, just raw JSON:
-
-{
-  "soilSummary": {
-    "pH": "value or null",
-    "nitrogen": "value or null",
-    "phosphorus": "value or null",
-    "potassium": "value or null",
-    "organicMatter": "value or null",
-    "iron": "value or null",
-    "notes": "2-3 sentence plain-english summary of what the soil test shows and the biggest priorities"
-  },
-  "insights": [
-    { "type": "good", "icon": "✅", "text": "actionable insight" }
-  ],
-  "months": [
-    {
-      "month": "January",
-      "season": "dormant",
-      "tasks": [
-        {
-          "id": "jan-1",
-          "category": "fert",
-          "name": "Short task name",
-          "desc": "What to do, why, and when in the month",
-          "rate": "Application rate per 1000 sqft",
-          "timing": "Specific timing note",
-          "waterIn": "Watering instruction after application",
-          "product": "Brand name product recommendation",
-          "productNote": "Why this product for this situation"
-        }
-      ]
-    }
-  ]
-}
-
-Rules:
-- Every month must have at least 1-2 tasks (mowing, watering counts)
-- Include specific rates scaled to ${p.sqft} sqft where relevant
-- Recommend real brand name products available on Amazon or at hardware stores
-- Factor in the ZIP code climate zone for timing
-- If soil test shows deficiencies, address them specifically in the program
-- Keep task names short (3-6 words), descriptions detailed but scannable
-- category must be one of: fert, pre, mow, water, fung, amend, pgr, other
-- insight type must be one of: good, warn, info`
+Rules: All 12 months required. 2-4 tasks per month. Real brand name products (Milorganite, Scotts, Andersons, Tenacity, Prodiamine, etc). Base timing on ZIP code climate. Category must be one of: fert,pre,mow,water,fung,amend,pgr,other`
     }
   ];
 
