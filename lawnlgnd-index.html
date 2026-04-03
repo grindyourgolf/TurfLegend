@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>TurfIQ — AI Lawn Planner</title>
+<title>LawnLGND — AI Lawn Planner</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Sans+3:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -575,7 +575,7 @@ cursor: pointer; flex-shrink: 0;
 
 <div class="app-header" id="appHeader">
   <div>
-    <div class="app-logo">TurfIQ<sup>AI</sup></div>
+    <div class="app-logo">LawnLGND<sup>AI</sup></div>
   </div>
   <div class="header-profile" id="headerProfile" style="display:none">
     <strong id="headerGrass">—</strong>
@@ -605,7 +605,7 @@ cursor: pointer; flex-shrink: 0;
     <div class="onboard-hero">
       <span class="hero-emblem">🌿</span>
       <h1>Know your lawn.<br>Own your season.</h1>
-      <p>Upload your soil test and TurfIQ builds a personalized month-by-month plan with exact products, rates, and timing.</p>
+      <p>Upload your soil test and LawnLGND builds a personalized month-by-month plan with exact products, rates, and timing.</p>
     </div>
     <div class="steps-track">
       <div class="step-tab current" id="stab1">1. Lawn Info</div>
@@ -618,12 +618,7 @@ cursor: pointer; flex-shrink: 0;
 <div class="onboard-step active" id="step1">
   <div style="margin-bottom:20px">
     <div class="card-title" style="font-size:22px;margin-bottom:4px">Tell us about your lawn</div>
-    <div class="card-sub">This helps TurfIQ tailor your program to your exact grass and goals.</div>
-  </div>
-  <div class="field">
-    <label>Anthropic API Key</label>
-    <input type="password" id="apiKey" placeholder="sk-ant-…" autocomplete="off" autocorrect="off" spellcheck="false">
-    <div class="field-hint">Your key is saved only on this device and never shared. Get one free at <strong>console.anthropic.com</strong></div>
+    <div class="card-sub">This helps LawnLGND tailor your program to your exact grass and goals.</div>
   </div>
   <div class="field">
     <label>Grass Type</label>
@@ -657,11 +652,11 @@ cursor: pointer; flex-shrink: 0;
   <div class="field-row">
     <div class="field">
       <label>Current Mow Height</label>
-      <input type="text" id="curHeight" placeholder='e.g. 2"'>
+      <input type="number" inputmode="decimal" step="0.25" min="0.25" max="6" id="curHeight" placeholder='e.g. 2'>
     </div>
     <div class="field">
       <label>Target Mow Height</label>
-      <input type="text" id="targetHeight" placeholder='e.g. 0.75"'>
+      <input type="number" inputmode="decimal" step="0.25" min="0.25" max="6" id="targetHeight" placeholder='e.g. 0.75'>
     </div>
   </div>
   <div class="field">
@@ -680,7 +675,7 @@ cursor: pointer; flex-shrink: 0;
 <div class="onboard-step" id="step2">
   <div style="margin-bottom:20px">
     <div class="card-title" style="font-size:22px;margin-bottom:4px">Upload your soil test</div>
-    <div class="card-sub">Take a clear screenshot or photo of your results. TurfIQ reads pH, nitrogen, phosphorus, potassium, and micros.</div>
+    <div class="card-sub">Take a clear screenshot or photo of your results. LawnLGND reads pH, nitrogen, phosphorus, potassium, and micros.</div>
   </div>
   <div class="upload-zone" id="uploadZone">
     <input type="file" id="soilFile" accept="image/*" onchange="handleSoilUpload(event)">
@@ -699,12 +694,34 @@ cursor: pointer; flex-shrink: 0;
 <!-- Step 3: Generating -->
 <div class="onboard-step" id="step3">
   <div class="ai-loading show" id="onboardLoader">
-    <div class="spinner-wrap">
-      <div class="spinner-ring"></div>
-      <div class="spinner-inner">🌱</div>
+    <div style="text-align:center;padding:40px 20px 0">
+      <div style="font-size:48px;margin-bottom:20px">🌱</div>
+      <div class="ai-status" id="loadStatus">Analyzing your soil test…</div>
+      <div class="ai-status-sub" id="loadSub" style="margin-bottom:24px">Reading pH, nutrients, and deficiencies</div>
     </div>
-    <div class="ai-status" id="loadStatus">Analyzing your soil test…</div>
-    <div class="ai-status-sub" id="loadSub">Reading pH, nutrients, and deficiencies</div>
+    <div style="padding:0 24px 40px">
+      <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:700;color:var(--text-muted);margin-bottom:8px">
+        <span id="progressLabel">Step 1 of 4</span>
+        <span id="progressPct">0%</span>
+      </div>
+      <div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden;margin-bottom:20px">
+        <div id="genProgressBar" style="height:100%;width:0%;background:linear-gradient(90deg,var(--turf-mid),var(--turf-light));border-radius:4px;transition:width 0.6s ease"></div>
+      </div>
+      <div id="progressSteps" style="display:flex;flex-direction:column;gap:8px">
+        <div class="prog-step" id="ps1" style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text-muted)">
+          <span class="ps-icon">⏳</span><span>Reading soil test image</span>
+        </div>
+        <div class="prog-step" id="ps2" style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text-muted)">
+          <span class="ps-icon">⏳</span><span>Analyzing nutrient levels</span>
+        </div>
+        <div class="prog-step" id="ps3" style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text-muted)">
+          <span class="ps-icon">⏳</span><span>Building 12-month program</span>
+        </div>
+        <div class="prog-step" id="ps4" style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text-muted)">
+          <span class="ps-icon">⏳</span><span>Selecting products &amp; rates</span>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 ```
@@ -730,7 +747,7 @@ cursor: pointer; flex-shrink: 0;
       <div class="empty">
         <div class="empty-icon">🧪</div>
         <div class="empty-title">No soil test yet</div>
-        <div class="empty-desc">Upload a soil test photo and TurfIQ will analyze your nutrients and build recommendations.</div>
+        <div class="empty-desc">Upload a soil test photo and LawnLGND will analyze your nutrients and build recommendations.</div>
       </div>
     </div>
     <div id="soilUploadSection" style="display:none">
@@ -792,8 +809,8 @@ cursor: pointer; flex-shrink: 0;
       <button class="btn btn-primary" onclick="saveApiKey()" style="margin-bottom:0">Save API Key</button>
     </div>
     <div class="card">
-      <div class="card-title" style="font-size:16px;margin-bottom:8px">About TurfIQ</div>
-      <p style="font-size:13px;color:var(--text-muted);line-height:1.6">TurfIQ uses AI to read your soil test and build a personalized lawn care program. Share this HTML file with friends — each person's data saves only on their own device.</p>
+      <div class="card-title" style="font-size:16px;margin-bottom:8px">About LawnLGND</div>
+      <p style="font-size:13px;color:var(--text-muted);line-height:1.6">LawnLGND uses AI to read your soil test and build a personalized lawn care program. Share this app with friends — each person's data saves only on their own device.</p>
     </div>
   </div>
 
@@ -894,14 +911,9 @@ function goStep2(){
   const gt = document.getElementById('grassType').value;
   const sq = document.getElementById('sqft').value;
   const zp = document.getElementById('zipCode').value;
-  const ak = document.getElementById('apiKey').value.trim();
-  if(!ak){ toast('Please enter your Anthropic API key'); return; }
-  if(!ak.startsWith('sk-')){ toast('API key should start with sk-ant-…'); return; }
   if(!gt){ toast('Please select your grass type'); return; }
   if(!sq){ toast('Please enter your lawn size'); return; }
   if(!zp || zp.length < 5){ toast('Please enter your ZIP code'); return; }
-
-  S.set('apiKey', ak);
 
   state.profile = {
     grassType: gt,
@@ -994,9 +1006,9 @@ async function retryGenerate(){
 async function generateProgram(imgB64, imgType, isUpdate){
   const p = state.profile;
 
-  setLoadStatus('Reading your soil test…', 'Extracting pH, nutrients, and deficiencies');
+  setLoadStatus('Reading your soil test…', 'Extracting pH, nutrients, and deficiencies', 1);
 
-  const systemPrompt = `You are TurfIQ, an expert turfgrass agronomist AI. You create precise, actionable, product-specific lawn care programs. You always recommend real brand name products available in the US (e.g. Milorganite, Flagship, Scotts, Andersons, Tenacity, Prodiamine, Headway G, etc.). You respond ONLY with valid JSON and nothing else — no markdown, no explanation, no preamble.`;
+  const systemPrompt = `You are LawnLGND, an expert turfgrass agronomist AI. You create precise, actionable, product-specific lawn care programs. You always recommend real brand name products available in the US (e.g. Milorganite, Flagship, Scotts, Andersons, Tenacity, Prodiamine, Headway G, etc.). You respond ONLY with valid JSON and nothing else — no markdown, no explanation, no preamble.`;
 
   const imgContext = imgB64
     ? `The user has uploaded a soil test screenshot. Analyze it carefully to extract all available values including pH, Nitrogen, Phosphorus, Potassium, Calcium, Magnesium, Sulfur, Iron, Manganese, Zinc, Copper, Boron, and Organic Matter. If a value is not readable, omit it.`
@@ -1074,19 +1086,15 @@ Rules:
     });
   }
 
-  setLoadStatus('Building your program…', 'Creating 12 months of personalized tasks');
+  setLoadStatus('Analyzing nutrients…', 'Matching deficiencies to your grass type', 2);
 
   let response;
   try {
     const apiKey = S.get('apiKey');
-    if(!apiKey) throw new Error('No API key found. Please reset and enter your API key.');
-    response = await fetch('https://api.anthropic.com/v1/messages', {
+    response = await fetch('/.netlify/functions/ai', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
@@ -1098,6 +1106,8 @@ Rules:
   } catch(fetchErr) {
     throw new Error('Network error (fetch failed): ' + fetchErr.message + ' — Check that you are connected to the internet and try again.');
   }
+
+  setLoadStatus('Building your program…', 'Creating 12 months of personalized tasks', 3);
 
   const responseText = await response.text();
   console.log('HTTP status:', response.status);
@@ -1149,15 +1159,46 @@ Rules:
     insights: parsed.insights
   };
 
-  setLoadStatus('Finalizing…', 'Your program is almost ready');
-  await new Promise(r=>setTimeout(r,600));
+  setLoadStatus('Finalizing your program…', 'Almost ready!', 4);
+  await new Promise(r=>setTimeout(r,800));
 }
 
-function setLoadStatus(main, sub){
+function setLoadStatus(main, sub, step){
   const el = document.getElementById('loadStatus');
   const sel = document.getElementById('loadSub');
   if(el) el.textContent = main;
-  if(sel) sel.textContent = sub;
+  if(sel && !sel.querySelector('button')) sel.textContent = sub || '';
+
+  // Drive progress bar
+  const steps = [0, 25, 50, 75, 100];
+  const labels = ['Step 1 of 4','Step 1 of 4','Step 2 of 4','Step 3 of 4','Step 4 of 4'];
+  const pcts = ['0%','25%','50%','75%','100%'];
+  const icons = ['⏳','🔍','🧮','📅','✅'];
+  if(step !== undefined){
+    const bar = document.getElementById('genProgressBar');
+    const lbl = document.getElementById('progressLabel');
+    const pct = document.getElementById('progressPct');
+    if(bar) bar.style.width = steps[step] + '%';
+    if(lbl) lbl.textContent = labels[step];
+    if(pct) pct.textContent = pcts[step];
+    // Update step indicators
+    for(let i=1; i<=4; i++){
+      const ps = document.getElementById('ps'+i);
+      if(!ps) continue;
+      const icon = ps.querySelector('.ps-icon');
+      if(i < step){
+        ps.style.color = 'var(--turf-bright)';
+        if(icon) icon.textContent = '✅';
+      } else if(i === step){
+        ps.style.color = 'var(--soil-mid)';
+        ps.style.fontWeight = '700';
+        if(icon) icon.textContent = icons[step];
+      } else {
+        ps.style.color = 'var(--text-muted)';
+        if(icon) icon.textContent = '⏳';
+      }
+    }
+  }
 }
 
 // ═══════════════════════════════════════════════
