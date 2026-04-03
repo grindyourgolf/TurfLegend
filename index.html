@@ -621,6 +621,11 @@ cursor: pointer; flex-shrink: 0;
     <div class="card-sub">This helps TurfIQ tailor your program to your exact grass and goals.</div>
   </div>
   <div class="field">
+    <label>Anthropic API Key</label>
+    <input type="password" id="apiKey" placeholder="sk-ant-…" autocomplete="off" autocorrect="off" spellcheck="false">
+    <div class="field-hint">Your key is saved only on this device and never shared. Get one free at <strong>console.anthropic.com</strong></div>
+  </div>
+  <div class="field">
     <label>Grass Type</label>
     <select id="grassType">
       <option value="">Select grass type…</option>
@@ -780,6 +785,13 @@ cursor: pointer; flex-shrink: 0;
       <button class="btn btn-ghost" onclick="confirmReset()" style="color:#c0392b; border-color:#f5c6c6">🗑️ Reset & Start Over</button>
     </div>
     <div class="card">
+      <div class="card-title" style="font-size:16px;margin-bottom:8px">API Key</div>
+      <div class="field" style="margin-bottom:10px">
+        <input type="password" id="settingsApiKey" placeholder="sk-ant-…" autocomplete="off" spellcheck="false">
+      </div>
+      <button class="btn btn-primary" onclick="saveApiKey()" style="margin-bottom:0">Save API Key</button>
+    </div>
+    <div class="card">
       <div class="card-title" style="font-size:16px;margin-bottom:8px">About TurfIQ</div>
       <p style="font-size:13px;color:var(--text-muted);line-height:1.6">TurfIQ uses AI to read your soil test and build a personalized lawn care program. Share this HTML file with friends — each person's data saves only on their own device.</p>
     </div>
@@ -882,9 +894,14 @@ function goStep2(){
   const gt = document.getElementById('grassType').value;
   const sq = document.getElementById('sqft').value;
   const zp = document.getElementById('zipCode').value;
+  const ak = document.getElementById('apiKey').value.trim();
+  if(!ak){ toast('Please enter your Anthropic API key'); return; }
+  if(!ak.startsWith('sk-')){ toast('API key should start with sk-ant-…'); return; }
   if(!gt){ toast('Please select your grass type'); return; }
   if(!sq){ toast('Please enter your lawn size'); return; }
   if(!zp || zp.length < 5){ toast('Please enter your ZIP code'); return; }
+
+  S.set('apiKey', ak);
 
   state.profile = {
     grassType: gt,
@@ -1061,12 +1078,15 @@ Rules:
 
   let response;
   try {
+    const apiKey = S.get('apiKey');
+    if(!apiKey) throw new Error('No API key found. Please reset and enter your API key.');
     response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'anthropic-dangerous-direct-browser-access': 'true',
-        'anthropic-version': '2023-06-01'
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
@@ -1425,6 +1445,13 @@ function deleteLog(id){
 // ═══════════════════════════════════════════════
 //  SETTINGS
 // ═══════════════════════════════════════════════
+function saveApiKey(){
+  const k = document.getElementById('settingsApiKey').value.trim();
+  if(!k){ toast('Please enter a key'); return; }
+  S.set('apiKey', k);
+  toast('API key saved ✓');
+}
+
 function renderSettings(){
   const el = document.getElementById('settingsProfile');
   if(!state.profile){ el.innerHTML=''; return; }
@@ -1436,6 +1463,9 @@ function renderSettings(){
     <div class="p-chip"><div class="p-chip-label">Target HOC</div><div class="p-chip-val">${p.targetHeight}</div></div>
     <div class="p-chip"><div class="p-chip-label">Irrigation</div><div class="p-chip-val" style="font-size:12px">${p.irrigation}</div></div>
   </div>`;
+  const ak = S.get('apiKey');
+  const skEl = document.getElementById('settingsApiKey');
+  if(skEl && ak) skEl.value = ak;
 }
 
 function updateHeaderProfile(){
